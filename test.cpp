@@ -29,8 +29,12 @@ int main(int args, char* vargs[]){
     // mat.setRow(0, x);
     // mat.show();
     // return 0;
-    std::string str_data("/home/pbn/Desktop/EDA/tarea 1/tarea 1/codigo base/data_eda.npy");
-    std::string str_consulta("/home/pbn/Desktop/EDA/tarea 1/tarea 1/codigo base/queries_eda.npy");
+    //Rutas Gonzalo
+    //std::string str_data("/home/pbn/Desktop/EDA/tarea 1/tarea 1/codigo base/data_eda.npy");
+    //std::string str_consulta("/home/pbn/Desktop/EDA/tarea 1/tarea 1/codigo base/queries_eda.npy");
+    //Rutas Enzo
+    std::string str_data("data/data_eda.npy");
+    std::string str_consulta("data/queries_eda.npy");
     Matrix mat(str_data); // crea los puntos normales
     Matrix mat1(str_consulta); // crea las consultas
 

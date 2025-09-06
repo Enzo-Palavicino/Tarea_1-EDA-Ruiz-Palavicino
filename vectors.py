@@ -24,9 +24,12 @@ clusters = [[0.842648, 0.418951],
 [0.544485, 0.88296],]
 clusters = np.array(clusters)
 
-data = np.load('/home/pbn/Desktop/EDA/tarea 1/tarea 1/codigo base/data_eda.npy')
-
-queries = np.load('/home/pbn/Desktop/EDA/tarea 1/tarea 1/codigo base/queries_eda.npy')
+#Rutas Gonzalo
+#data = np.load('/home/pbn/Desktop/EDA/tarea 1/tarea 1/codigo base/data_eda.npy')
+#queries = np.load('/home/pbn/Desktop/EDA/tarea 1/tarea 1/codigo base/queries_eda.npy')
+#rutas Enzo
+data = np.load('data/data_eda.npy')
+queries = np.load('data/queries_eda.npy')
 
 data = np.array(data)
 
@@ -154,11 +157,11 @@ np.save('queries_eda.npy', queries)
 plt.scatter(data[:,0], data[:,1], color = 'red')
 plt.scatter(0.883881, 0.0529076, color = 'blue') # muestra el la consulta 0
 plt.scatter(c1[:,0], c1[:,1], color = 'green')
-#plt.scatter(queries[:,0], queries[:,1], color = 'blue')
-#plt.scatter(clusters[:,0], clusters[:,1], color = 'blue')
-#plt.scatter(id0[:,0],  id0[:,1],color = 'green')
-#plt.scatter(id1[:,0],  id1[:,1],color = 'yellow')
-#plt.scatter(id2[:,0],  id2[:,1],color = 'violet')
+# plt.scatter(queries[:,0], queries[:,1], color = 'blue')
+# plt.scatter(clusters[:,0], clusters[:,1], color = 'blue')
+# plt.scatter(id0[:,0],  id0[:,1],color = 'green')
+# plt.scatter(id1[:,0],  id1[:,1],color = 'yellow')
+# plt.scatter(id2[:,0],  id2[:,1],color = 'violet')
 # plt.scatter(data[inds_1,0], data[inds_1,1], color = 'green')
 # plt.scatter(data[inds_2,0], data[inds_2,1], color = 'yellow')
 plt.title('Data Visualization')
