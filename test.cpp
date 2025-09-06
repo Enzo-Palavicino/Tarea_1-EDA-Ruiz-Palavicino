@@ -71,20 +71,24 @@ int main(int args, char* vargs[]){
     /*for(int i = 0; i < cantidad_clusters; i++){ // puntos por cluster
         std::cout << " En el cluster n° " << i << ", hay " << (cluster.getInds(i)).size() << " puntos " << std::endl;
     }*/
-    int m = 100;
+    int m = 10;
     SimSearch simulador(puntos, consultas, &cluster);
 
-    /*
+    
     std::chrono::high_resolution_clock::time_point inicio = std::chrono::high_resolution_clock::now();
     //std::vector<std::vector<std::vector<float>>> ordenado_consulta;
     for(size_t i = 0; i < consultas.size(); i ++){
-        std::vector<std::vector<float>> a = simulador.search_without(simulador.pasar_consulta(0), m);  // las ordenaciones sin clusters se guardan en consultas
+        std::vector<std::vector<float>> a = simulador.search_without(simulador.pasar_consulta(i), m);  // las ordenaciones sin clusters se guardan en consultas
+        for(size_t j = 0; j < a.size(); j++){
+            std::cout << "[ " << a[j][0] << "," << a[j][1] << "]" << std::endl;
+        }
+        std::cout << std::endl;
     }
     std::chrono::high_resolution_clock::time_point fin = std::chrono::high_resolution_clock::now();
     std::chrono::microseconds duracion = std::chrono::duration_cast<std::chrono::microseconds>(fin - inicio);
 
     std::cout << "El tiempo de ordenado demoro " << duracion.count() << " [uSeg] microsegundos  " << std::endl;
-    */
+    
     
 
     
