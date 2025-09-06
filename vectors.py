@@ -28,10 +28,8 @@ clusters = np.array(clusters)
 #data = np.load('/home/pbn/Desktop/EDA/tarea 1/tarea 1/codigo base/data_eda.npy')
 #queries = np.load('/home/pbn/Desktop/EDA/tarea 1/tarea 1/codigo base/queries_eda.npy')
 #rutas Enzo
-#data = np.load('data_eda.npy')
+data = np.load('data_eda.npy')
 queries = np.load('queries_eda.npy')
-
-data = []
 
 data = np.array(data)
 
@@ -158,7 +156,7 @@ np.save('queries_eda.npy', queries)
 
 plt.scatter(data[:,0], data[:,1], color = 'red')
 plt.scatter(0.883881, 0.0529076, color = 'blue') # muestra el la consulta 0
-plt.scatter(c1[:,0], c1[:,1], color = 'green')
+#plt.scatter(c1[:,0], c1[:,1], color = 'green') # cluster
 # plt.scatter(queries[:,0], queries[:,1], color = 'blue')
 # plt.scatter(clusters[:,0], clusters[:,1], color = 'blue')
 # plt.scatter(id0[:,0],  id0[:,1],color = 'green')
