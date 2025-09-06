@@ -28,8 +28,8 @@ clusters = np.array(clusters)
 #data = np.load('/home/pbn/Desktop/EDA/tarea 1/tarea 1/codigo base/data_eda.npy')
 #queries = np.load('/home/pbn/Desktop/EDA/tarea 1/tarea 1/codigo base/queries_eda.npy')
 #rutas Enzo
-data = np.load('data/data_eda.npy')
-queries = np.load('data/queries_eda.npy')
+data = np.load('data_eda.npy')
+queries = np.load('queries_eda.npy')
 
 data = np.array(data)
 
