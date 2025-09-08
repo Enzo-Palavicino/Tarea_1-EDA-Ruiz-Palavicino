@@ -6,6 +6,8 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
+#include <numeric>
+#include <algorithm>
 
 float vec_compute_distance(const float* u, const float* v, size_t dim){ // quite el const porque molestaba mucho en el codigo de calcular las distancias
     float d = 0;
@@ -115,6 +117,20 @@ void quick_sort(std::vector<punto>& puntos, int i, int j) {
         quick_sort(puntos, k + 1, j);
     }
 }
+
+std::vector<size_t> argsort(const std::vector<punto>& puntos) {
+    // Crea un vector de indices de 0 a n-1
+    std::vector<size_t> indices(puntos.size());
+    std::iota(indices.begin(), indices.end(), 0);
+
+    // Ordena los indices en base a la distancia de los puntos
+    std::sort(indices.begin(), indices.end(), [&puntos](size_t i, size_t j) {
+        return puntos[i].mostrar_distancia() < puntos[j].mostrar_distancia();
+    });
+
+    return indices;
+}
+
 // funcion que calcule todas las distancias de los puntos de un arreglo
 
 // algoritmo de ver el maximo de los puntos

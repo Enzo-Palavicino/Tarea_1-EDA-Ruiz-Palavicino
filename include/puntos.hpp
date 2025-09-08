@@ -22,7 +22,7 @@ class punto{
         int mostrar_nombre();
         std::vector<float> mostrar_posicion();
         void imprimir_posicion();
-        float mostrar_distancia();
+        float mostrar_distancia() const;
         int cluster_actual();
         void editar_distancia(float n_dis);
         void mostrar_datos();

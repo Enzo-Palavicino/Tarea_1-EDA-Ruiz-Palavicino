@@ -21,7 +21,7 @@ std::vector<float> punto::mostrar_posicion(){
     return posicion;
 }
 
-float punto::mostrar_distancia(){
+float punto::mostrar_distancia() const {
     return dis_cent;
 }
 
@@ -33,13 +33,20 @@ void punto::editar_distancia(float n_dis){
     dis_cent = n_dis;
 }
 
+// void punto::mostrar_datos(){
+//     std::cout << "======================================" << "\n\n";
+//     std::cout <<"          Datos del punto " << nombre << "\n \n";
+//     std::cout <<" x: " << posicion[0] << " y: " << posicion[1] << std::endl;
+//     std::cout <<" pertenece al cluster: " << n_cluster << std::endl;
+//     std::cout <<" distancia a la consulta: " << dis_cent << std::endl;
+//     std::cout << "======================================" << "\n\n";
+// }
+
 void punto::mostrar_datos(){
-    std::cout << "======================================" << "\n\n";
-    std::cout <<"          Datos del punto " << nombre << "\n \n";
-    std::cout <<" x: " << posicion[0] << " y: " << posicion[1] << std::endl;
-    std::cout <<" pertenece al cluster: " << n_cluster << std::endl;
-    std::cout <<" distancia a la consulta: " << dis_cent << std::endl;
-    std::cout << "======================================" << "\n\n";
+    std::cout << "Nombre: " << nombre << std::endl;
+    std::cout << "Cluster: " << n_cluster << std::endl;
+    std::cout << "Posicion: (" << posicion[0] << ", " << posicion[1] << ")" << std::endl;
+    std::cout << "Distancia: " << dis_cent << std::endl;
 }
 
 void punto::imprimir_posicion(){

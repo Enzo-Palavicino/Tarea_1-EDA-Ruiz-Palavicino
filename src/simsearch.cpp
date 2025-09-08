@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <ctime>
 
-SimSearch::SimSearch(std::vector<punto> puntos1, std::vector<Consulta> consultas1, Cluster*  clusters1){
+SimSearch::SimSearch(std::vector<punto> puntos1, std::vector<Consulta> consultas1, Cluster* clusters1){
     puntos = puntos1;
     consultas = consultas1;
     clusters = clusters1;
@@ -31,40 +31,76 @@ Consulta  SimSearch::pasar_consulta(int i){
 
 }
 
-std::vector<std::vector<float>> SimSearch::search_without(Consulta con, int m){
+size_t SimSearch::get_comparaciones() const { 
+    return comparaciones_count; 
+}
 
-    // calculador de distancias
-    // primero hay que calcular la distancia de la consulta a 0 al m-esimo punto
+void SimSearch::reset_comparaciones() { 
+    comparaciones_count = 0; 
+}
+
+std::vector<size_t> SimSearch::search_without(Consulta con, int m){
+    reset_comparaciones();
     float coor_c[2] = {(con.dar_posicion())[0], (con.dar_posicion())[1]};
 
     for(size_t i = 0; i < puntos.size(); i ++){
-
-        float coor_p[2] = {(pasar_puntos()[i].mostrar_posicion())[0], (pasar_puntos()[i].mostrar_posicion())[1]};
+        float coor_p[2] = {(puntos[i].mostrar_posicion())[0], (puntos[i].mostrar_posicion())[1]};
         float distancia = vec_compute_distance(coor_c, coor_p, 2);
         puntos[i].editar_distancia(distancia);
-
+        comparaciones_count++;
     }
-    //---------------------------------------------
 
-    // ordenador quicksort
-    std::vector<punto> punto_aux = puntos;
+    std::vector<size_t> indices_ordenados = argsort(puntos);
 
-    quick_sort(punto_aux, 0, punto_aux.size()-1);
-
-    con.modificar_puntos(punto_aux); // esto es para hacer más facil la comparacion del error
-
-    std::vector<std::vector<float>> punto_dis;
-
-    for(int i = 0; i < m; i ++){
-        std::vector<float> aux = {(punto_aux[i].mostrar_posicion())[0], (punto_aux[i].mostrar_posicion())[1]};
-        punto_dis.push_back(aux);
-
+    std::vector<size_t> resultado;
+    for(int i = 0; i < m; i++){
+        resultado.push_back(puntos[indices_ordenados[i]].mostrar_nombre());
     }
-    return punto_dis;
+    return resultado;
 } 
 
-std::vector<std::vector<size_t>> SimSearch::search_with_clusters(Consulta con ,int m){
+std::vector<size_t> SimSearch::search_with_clusters(Consulta con ,int m){
+    reset_comparaciones();
+    float min_distancia_cluster = -1;
+    size_t cluster_mas_cercano = 0;
 
+    for (size_t i = 0; i < clusters->getK(); i++) {
+        const float* centroide = clusters->getCentroid(i);
+        float distancia_a_cluster = vec_compute_distance(con.dar_posicion().data(), centroide, 2);
+        
+        if (min_distancia_cluster == -1 || distancia_a_cluster < min_distancia_cluster) {
+            min_distancia_cluster = distancia_a_cluster;
+            cluster_mas_cercano = i;
+        }
+    }
+
+    std::vector<size_t> indices_en_cluster = clusters->getInds(cluster_mas_cercano);
+    std::vector<punto> puntos_del_cluster;
+    for(size_t indice : indices_en_cluster){
+        puntos_del_cluster.push_back(puntos[indice]);
+    }
+
+    float coor_c[2] = {(con.dar_posicion())[0], (con.dar_posicion())[1]};
+    for(size_t i = 0; i < puntos_del_cluster.size(); i ++){
+        float coor_p[2] = {(puntos_del_cluster[i].mostrar_posicion())[0], (puntos_del_cluster[i].mostrar_posicion())[1]};
+        float distancia = vec_compute_distance(coor_c, coor_p, 2);
+        puntos_del_cluster[i].editar_distancia(distancia);
+        comparaciones_count++;
+    }
+
+    std::vector<size_t> indices_ordenados = argsort(puntos_del_cluster);
+
+    std::vector<size_t> resultado;
+    for(int i = 0; i < m && i < indices_ordenados.size(); i++){
+        resultado.push_back(puntos_del_cluster[indices_ordenados[i]].mostrar_nombre());
+    }
+
+    // Manejar el caso si el cluster es más pequeño que m
+    if(resultado.size() < m){
+        // Lógica para buscar en clústeres vecinos.
+        // Esto es un desafío adicional que puedes implementar después.
+        // Por ahora, solo devolvemos lo que encontramos.
+    }
     
-
+    return resultado;
 }

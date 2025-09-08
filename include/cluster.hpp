@@ -23,4 +23,5 @@ class Cluster{
         void imprimir_puntos(size_t numero, const Matrix& mat);
         std::vector<punto> get_punto(int i);
         int cantidad_puntos(int i);
+        size_t getK() const; // Agregamos la declaración de la nueva función
 };

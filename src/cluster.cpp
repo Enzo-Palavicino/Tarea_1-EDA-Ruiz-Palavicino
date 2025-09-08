@@ -130,3 +130,8 @@ std::vector<punto> Cluster::get_punto(int i){
 int Cluster::cantidad_puntos(int i){
     return inds[i].size();
 }
+
+// Agregamos la implementación de la nueva función
+size_t Cluster::getK() const {
+    return k_clusters;
+}

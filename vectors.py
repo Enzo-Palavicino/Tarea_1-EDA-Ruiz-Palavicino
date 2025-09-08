@@ -156,7 +156,7 @@ np.save('queries_eda.npy', queries)
 
 plt.scatter(data[:,0], data[:,1], color = 'red')
 plt.scatter(0.883881, 0.0529076, color = 'blue') # muestra el la consulta 0
-#plt.scatter(c1[:,0], c1[:,1], color = 'green') # cluster
+plt.scatter(c1[:,0], c1[:,1], color = 'green') # cluster
 # plt.scatter(queries[:,0], queries[:,1], color = 'blue')
 # plt.scatter(clusters[:,0], clusters[:,1], color = 'blue')
 # plt.scatter(id0[:,0],  id0[:,1],color = 'green')

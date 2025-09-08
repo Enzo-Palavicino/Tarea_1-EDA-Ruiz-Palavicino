@@ -28,8 +28,7 @@ int dividir_punto(std::vector<punto> & puntos, int i, int j); // esta funcion se
 
 void quick_sort(std::vector<punto> & puntos, int i, int j);
 
-//con clusters
+// con clusters
 
-
-//size_t *argsort(...)
-
+// Funcion que ordena los indices de un vector de puntos en base a sus distancias.
+std::vector<size_t> argsort(const std::vector<punto>& puntos);
