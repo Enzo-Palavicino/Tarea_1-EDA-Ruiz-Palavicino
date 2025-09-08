@@ -8,27 +8,27 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
+#include <chrono>
 
 SimSearch::SimSearch(std::vector<punto> puntos1, std::vector<Consulta> consultas1, Cluster* clusters1){
     puntos = puntos1;
     consultas = consultas1;
     clusters = clusters1;
-
+    comparaciones_count = 0;
+    time_without_sort = 0;
+    time_with_sort = 0;
 }
 
 Cluster * SimSearch::pasar_cluster(){
-    return clusters; // pasa el puntero original, es decir el cluster original, asi que hay que tener cuidado
-
+    return clusters;
 }
 
-std::vector<punto>  SimSearch::pasar_puntos(){
+std::vector<punto> SimSearch::pasar_puntos(){
     return puntos;
-
 }
 
-Consulta  SimSearch::pasar_consulta(int i){
+Consulta SimSearch::pasar_consulta(int i){
     return consultas[i];
-
 }
 
 size_t SimSearch::get_comparaciones() const { 
@@ -39,10 +39,20 @@ void SimSearch::reset_comparaciones() {
     comparaciones_count = 0; 
 }
 
+long long SimSearch::get_time_without_sort() const {
+    return time_without_sort;
+}
+
+long long SimSearch::get_time_with_sort() const {
+    return time_with_sort;
+}
+
 std::vector<size_t> SimSearch::search_without(Consulta con, int m){
     reset_comparaciones();
-    float coor_c[2] = {(con.dar_posicion())[0], (con.dar_posicion())[1]};
 
+    auto start_search = std::chrono::high_resolution_clock::now();
+
+    float coor_c[2] = {(con.dar_posicion())[0], (con.dar_posicion())[1]};
     for(size_t i = 0; i < puntos.size(); i ++){
         float coor_p[2] = {(puntos[i].mostrar_posicion())[0], (puntos[i].mostrar_posicion())[1]};
         float distancia = vec_compute_distance(coor_c, coor_p, 2);
@@ -50,7 +60,15 @@ std::vector<size_t> SimSearch::search_without(Consulta con, int m){
         comparaciones_count++;
     }
 
+    auto stop_search = std::chrono::high_resolution_clock::now();
+    time_without_sort = std::chrono::duration_cast<std::chrono::microseconds>(stop_search - start_search).count();
+    
+    // Iniciar el cronómetro para la ordenación
+    auto start_sort = std::chrono::high_resolution_clock::now();
     std::vector<size_t> indices_ordenados = argsort(puntos);
+    auto stop_sort = std::chrono::high_resolution_clock::now();
+
+    time_with_sort = time_without_sort + std::chrono::duration_cast<std::chrono::microseconds>(stop_sort - start_sort).count();
 
     std::vector<size_t> resultado;
     for(int i = 0; i < m; i++){
@@ -61,12 +79,17 @@ std::vector<size_t> SimSearch::search_without(Consulta con, int m){
 
 std::vector<size_t> SimSearch::search_with_clusters(Consulta con ,int m){
     reset_comparaciones();
+
+    // Iniciar el cronómetro para el cálculo de distancias
+    auto start_search = std::chrono::high_resolution_clock::now();
+
     float min_distancia_cluster = -1;
     size_t cluster_mas_cercano = 0;
 
     for (size_t i = 0; i < clusters->getK(); i++) {
         const float* centroide = clusters->getCentroid(i);
         float distancia_a_cluster = vec_compute_distance(con.dar_posicion().data(), centroide, 2);
+        comparaciones_count++;
         
         if (min_distancia_cluster == -1 || distancia_a_cluster < min_distancia_cluster) {
             min_distancia_cluster = distancia_a_cluster;
@@ -85,22 +108,29 @@ std::vector<size_t> SimSearch::search_with_clusters(Consulta con ,int m){
         float coor_p[2] = {(puntos_del_cluster[i].mostrar_posicion())[0], (puntos_del_cluster[i].mostrar_posicion())[1]};
         float distancia = vec_compute_distance(coor_c, coor_p, 2);
         puntos_del_cluster[i].editar_distancia(distancia);
-        comparaciones_count++;
     }
 
+    auto stop_search = std::chrono::high_resolution_clock::now();
+    time_without_sort = std::chrono::duration_cast<std::chrono::microseconds>(stop_search - start_search).count();
+    
+    // Iniciar el cronómetro para la ordenación
+    auto start_sort = std::chrono::high_resolution_clock::now();
     std::vector<size_t> indices_ordenados = argsort(puntos_del_cluster);
+    auto stop_sort = std::chrono::high_resolution_clock::now();
+
+    time_with_sort = time_without_sort + std::chrono::duration_cast<std::chrono::microseconds>(stop_sort - start_sort).count();
 
     std::vector<size_t> resultado;
     for(int i = 0; i < m && i < indices_ordenados.size(); i++){
         resultado.push_back(puntos_del_cluster[indices_ordenados[i]].mostrar_nombre());
     }
-
-    // Manejar el caso si el cluster es más pequeño que m
+    
+    // Lógica para buscar en clústeres vecinos si el tamaño del clúster es menor a m
     if(resultado.size() < m){
-        // Lógica para buscar en clústeres vecinos.
         // Esto es un desafío adicional que puedes implementar después.
         // Por ahora, solo devolvemos lo que encontramos.
     }
     
     return resultado;
 }
+//punto seguro

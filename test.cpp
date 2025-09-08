@@ -46,6 +46,9 @@ int main(){
     Cluster clusters_totales(mat_data, k);
     SimSearch simulador(puntos_totales, consultas_totales, &clusters_totales);
 
+    long long total_time_without_sort = 0;
+    long long total_time_with_sort = 0;
+
     auto start_without = std::chrono::high_resolution_clock::now();
     for(int i = 0; i < numero_consultas; i++){
         std::vector<size_t> a = simulador.search_without(simulador.pasar_consulta(i), m);
@@ -56,9 +59,10 @@ int main(){
     std::cout << "* Numero de Clusters: " << k << std::endl;
     std::cout << "* m: " << m << std::endl;
 
-    std::cout << "------------------------------------------------------"<< std::endl;
-    std::cout << "* Tiempo de busqueda sin clusters: " << duration_without.count() << " microsegundos" << std::endl;
-    std::cout << "* Comparaciones sin clusters: " << simulador.get_comparaciones() << " comparaciones" << std::endl;
+    // std::cout << "------------------------------------------------------"<< std::endl;
+    // std::cout << "* Tiempo de busqueda sin clusters: " << duration_without.count() << " microsegundos" << std::endl;
+    // std::cout << "* Comparaciones sin clusters: " << simulador.get_comparaciones() << " comparaciones" << std::endl;
+    // std::cout << "* Tiempo sin ordenar sin clusters: " << simulador.get_time_without_sort() << " microsegundos" << std::endl;
 
     clusters_totales.applyClustering();
     
@@ -69,9 +73,42 @@ int main(){
     auto stop_with = std::chrono::high_resolution_clock::now();
     auto duration_with = std::chrono::duration_cast<std::chrono::microseconds>(stop_with - start_with);
 
+    // std::cout << "------------------------------------------------------"<< std::endl;
+    // std::cout << "* Tiempo de busqueda con clusters: " << duration_with.count() << " microsegundos" << std::endl;
+    // std::cout << "* Comparaciones con clusters: " << simulador.get_comparaciones() << " comparaciones" << std::endl;
+    // std::cout << "* Tiempo sin ordenar sin clusters: " << simulador.get_time_with_sort() << " microsegundos" << std::endl;
+    // std::cout << "* Tiempo con ordenar sin clusters: " << simulador.get_time_without_sort() << " microsegundos" << std::endl;    
+
+    std::cout << "--- Busqueda sin Clusters ---" << std::endl;
+    for(int i = 0; i < numero_consultas; i++){
+        simulador.search_without(simulador.pasar_consulta(i), m);
+        total_time_without_sort += simulador.get_time_without_sort();
+        total_time_with_sort += simulador.get_time_with_sort();
+        
+    }
     std::cout << "------------------------------------------------------"<< std::endl;
-    std::cout << "* Tiempo de busqueda con clusters: " << duration_with.count() << " microsegundos" << std::endl;
-    std::cout << "* Comparaciones con clusters: " << simulador.get_comparaciones() << " comparaciones" << std::endl;
+    std::cout << "Tiempo de busqueda sin ordenar: " << total_time_without_sort << " microsegundos" << std::endl;
+    std::cout << "Tiempo de busqueda con ordenar: " << total_time_with_sort << " microsegundos" << std::endl;
+    std::cout << "Comparaciones sin clusters: " <<  simulador.get_comparaciones() << " comparaciones" << std::endl;
+
+    long long total_time_without_sort_clusters = 0;
+    long long total_time_with_sort_clusters = 0;
+
+    clusters_totales.applyClustering();
     
+    std::cout << "\n--- Busqueda con Clusters ---" << std::endl;
+    for(int i = 0; i < numero_consultas; i++){
+        simulador.search_with_clusters(simulador.pasar_consulta(i), m);
+        total_time_without_sort_clusters += simulador.get_time_without_sort();
+        total_time_with_sort_clusters += simulador.get_time_with_sort();
+
+    }
+    
+    std::cout << "------------------------------------------------------"<< std::endl;
+    std::cout << "Tiempo de busqueda sin ordenar: " << total_time_without_sort_clusters << " microsegundos" << std::endl;
+    std::cout << "Tiempo de busqueda con ordenar: " << total_time_with_sort_clusters << " microsegundos" << std::endl;
+    std::cout << "Comparaciones con clusters: " <<  simulador.get_comparaciones() << " comparaciones" << std::endl;
+
     return 0;
 }
+//punto seguro
