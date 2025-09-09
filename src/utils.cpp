@@ -57,29 +57,22 @@ void print_array(const float *array, size_t d){
     std::cout<< std::endl;
 }
 
-void crear_puntos( const float * mat, std::vector<punto> * puntos, int t){
-    size_t dim = t;
-    //std::cout << "tamaño de datos:  " << dim << std::endl;
-    for(size_t i = 0; i < dim; i ++){
+void crear_puntos(const float * mat, std::vector<punto> * puntos, int t){
+    // t es el número de puntos, cada punto tiene 2 coordenadas
+    for(size_t i = 0; i < t; i++){
         std::vector<float> coordenadas;
-        coordenadas.push_back(mat[i]);
-        coordenadas.push_back(mat[i+1]);
-        //std::cout << " numero: " <<  i << ",";
-        //std::cout << "x: " << coordenadas[0] << " y: " << coordenadas[1] << std::endl;
-        (puntos)->push_back(punto(coordenadas,  0, i));
+        coordenadas.push_back(mat[i * 2]);      // ← x
+        coordenadas.push_back(mat[i * 2 + 1]);  // ← y
+        puntos->push_back(punto(coordenadas, 0, i));  // i como ID único
     }
 }
 
-void crear_consultas(const float * mat, std::vector<Consulta> * consultas, int  t){
-       size_t dim = t;
-    //std::cout << "tamaño de datos:  " << dim << std::endl;
-    for(size_t i = 0; i < dim; i ++){
+void crear_consultas(const float * mat, std::vector<Consulta> * consultas, int t){
+    for(size_t i = 0; i < t; i++){
         std::vector<float> coordenadas;
-        coordenadas.push_back(mat[i]);
-        coordenadas.push_back(mat[i+1]);
-        //std::cout << " numero: " <<  i << ",";
-        //std::cout << "x: " << coordenadas[0] << " y: " << coordenadas[1] << std::endl;
-        (consultas)->push_back(Consulta(i, coordenadas));
+        coordenadas.push_back(mat[i * 2]);      // ← x
+        coordenadas.push_back(mat[i * 2 + 1]);  // ← y
+        consultas->push_back(Consulta(i, coordenadas));
     } 
 }
 
@@ -131,16 +124,17 @@ std::vector<size_t> argsort(const std::vector<punto>& puntos) {
     return indices;
 }
 
-// funcion que calcule todas las distancias de los puntos de un arreglo
-
-// algoritmo de ver el maximo de los puntos
-
-// seria bueno ocupar 2 algoritmos distintos para comparar la velocidad de estos
-
-// algoritmo merge sort de los puntos en base a la distancia
-
-// algoritmo quick sort de los puntos en base a la distancia
-
-// funcion que imprima las posiciones de los puntos de un arreglo
-
-
+// Nueva implementación: argsort para vectores de floats
+std::vector<size_t> argsort(const std::vector<float>& values) {
+    std::vector<size_t> indices(values.size());
+    for (size_t i = 0; i < values.size(); i++) {
+        indices[i] = i;
+    }
+    
+    // Ordenar índices basado en los valores
+    std::sort(indices.begin(), indices.end(), 
+              [&values](size_t i, size_t j) { return values[i] < values[j]; });
+    
+    return indices;
+}
+//punto seguro
