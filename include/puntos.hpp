@@ -1,5 +1,4 @@
 #pragma once
-
 #include <vector>
 #include<iostream>
 #include<string>
@@ -10,17 +9,15 @@
 
 class punto{
     protected:
-
-        std::vector<float> posicion; // [0] --> x, [1] --> y
+        std::vector<float> posicion;
         int n_cluster;
         int nombre;
-        float dis_cent; // la voy a ocupar como la distancia con la consulta
+        float dis_cent;
 
     public:
-
         punto(std::vector<float> posicion, int n_cluster, int nombre);
         int mostrar_nombre();
-        std::vector<float> mostrar_posicion();
+        std::vector<float> mostrar_posicion() const;
         void imprimir_posicion();
         float mostrar_distancia() const;
         int cluster_actual();

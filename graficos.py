@@ -1,146 +1,177 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 
-def cargar_puntos(archivo):
-    """Carga puntos desde un archivo de texto"""
+def leer_puntos_archivo(archivo):
+    """Lee un archivo de puntos y devuelve un array numpy"""
     puntos = []
     with open(archivo, 'r') as f:
         for linea in f:
-            try:
-                x, y = map(float, linea.strip().split())
+            coords = linea.strip().split()
+            if len(coords) >= 2:
+                x = float(coords[0])
+                y = float(coords[1])
                 puntos.append([x, y])
-            except:
-                continue
     return np.array(puntos)
 
-def cargar_clusters(archivo):
-    """Carga información de clusters"""
+def leer_puntos_con_clusters(archivo):
+    """Lee archivo con puntos y su cluster asignado"""
+    puntos = []
     clusters = []
     with open(archivo, 'r') as f:
         for linea in f:
-            try:
-                x, y, cluster_id = map(float, linea.strip().split())
-                clusters.append([x, y, int(cluster_id)])
-            except:
-                continue
-    return np.array(clusters)
+            datos = linea.strip().split()
+            if len(datos) >= 3:
+                x = float(datos[0])
+                y = float(datos[1])
+                cluster = int(datos[2])
+                puntos.append([x, y])
+                clusters.append(cluster)
+    return np.array(puntos), np.array(clusters)
 
-def visualizar_busqueda_sin_clustering():
-    """Visualización de búsqueda SIN clustering"""
-    print("Cargando datos para visualización sin clustering...")
+def leer_centroides(archivo):
+    """Lee archivo de centroides"""
+    centroides = []
+    with open(archivo, 'r') as f:
+        for linea in f:
+            coords = linea.strip().split()
+            if len(coords) >= 2:
+                x = float(coords[0])
+                y = float(coords[1])
+                centroides.append([x, y])
+    return np.array(centroides)
+
+def leer_consulta(archivo):
+    """Lee el punto de consulta"""
+    with open(archivo, 'r') as f:
+        linea = f.readline().strip()
+        coords = linea.split()
+        if len(coords) >= 2:
+            x = float(coords[0])
+            y = float(coords[1])
+            return np.array([x, y])
+    return None
+
+def grafico_sin_clustering():
+    """Genera gráfico para búsqueda SIN clustering - Estilo minimalista"""
+    print("Generando gráfico SIN clustering...")
+    try:
+        catalogo = np.load('data_eda.npy')
+        consulta = leer_consulta('consulta_actual.txt')
+        vecinos = leer_puntos_archivo('vecinos_sin_clustering.txt')
+    except FileNotFoundError as e:
+        print(f"Error: Archivo no encontrado - {e}")
+        return
+
+    plt.figure(figsize=(10, 8), facecolor='white')
+
+    plt.scatter(catalogo[:, 0], catalogo[:, 1], 
+                c='lightgray', alpha=0.7, s=20, label='Catálogo')
+
+    plt.scatter(vecinos[:, 0], vecinos[:, 1], 
+                c='navy', s=80, label='Vecinos más cercanos', 
+                edgecolors='white', linewidth=1, alpha=0.9)
+
+    plt.scatter(consulta[0], consulta[1], 
+                c='red', marker='*', s=300, 
+                label='Consulta', edgecolors='black', linewidth=1.5)
     
-    # Cargar datos originales
-    data = np.load('data_eda.npy')
-    queries = np.load('queries_eda.npy')
+    plt.title('Búsqueda SIN Clustering', fontsize=14, fontweight='bold', pad=20)
+    plt.xlabel('Coordenada X', fontsize=11)
+    plt.ylabel('Coordenada Y', fontsize=11)
+    plt.grid(True, alpha=0.2, linestyle='--')
+    plt.legend(loc='upper right', frameon=True, fancybox=True, shadow=True)
     
-    # Cargar resultados exportados desde C++
-    consulta = cargar_puntos('consulta_actual.txt')
-    vecinos_sin = cargar_puntos('vecinos_sin_clustering.txt')
+    plt.gca().set_facecolor('white')
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
+    plt.gca().spines['left'].set_alpha(0.3)
+    plt.gca().spines['bottom'].set_alpha(0.3)
     
-    # Crear visualización
-    plt.figure(figsize=(10, 8))
-    
-    # Todos los puntos del catálogo X (rojo)
-    plt.scatter(data[:, 0], data[:, 1], color='red', alpha=0.5, s=15, label='Catálogo X (1000 puntos)')
-    
-    # Todas las consultas Q (azul claro)
-    plt.scatter(queries[:, 0], queries[:, 1], color='blue', alpha=0.3, s=20, label='Consultas Q')
-    
-    # Consulta actual (azul oscuro)
-    plt.scatter(consulta[:, 0], consulta[:, 1], color='darkblue', s=150, marker='*', 
-                edgecolors='white', linewidth=2, label='Consulta actual', zorder=10)
-    
-    # Vecinos más cercanos (verde)
-    plt.scatter(vecinos_sin[:, 0], vecinos_sin[:, 1], color='green', s=80, 
-                edgecolors='black', linewidth=1.5, label='8 vecinos más cercanos', zorder=5)
-    
-    plt.title('Búsqueda SIN Clustering (Fuerza Bruta)\nComparación con todos los 1000 puntos', fontsize=14)
-    plt.xlabel('Coordenada X', fontsize=12)
-    plt.ylabel('Coordenada Y', fontsize=12)
-    plt.legend()
-    plt.grid(True, alpha=0.2)
     plt.axis('equal')
-    
-    plt.savefig('busqueda_sin_clustering.png', dpi=300, bbox_inches='tight')
+    plt.tight_layout()
+    plt.savefig('busqueda_sin_clustering.png', dpi=300, bbox_inches='tight', 
+                facecolor='white', edgecolor='none')
     plt.show()
+    print("Gráfico SIN clustering guardado como 'busqueda_sin_clustering.png'")
 
-def visualizar_busqueda_con_clustering(k_value):
-    """Visualización de búsqueda CON clustering"""
-    print(f"Cargando datos para visualización con k={k_value} clusters...")
+def grafico_con_clustering(k=32):
+    """Genera gráfico para búsqueda CON clustering - Estilo similar a la referencia"""
+    print(f"Generando gráfico CON clustering (k={k})...")
     
-    # Cargar datos originales
-    data = np.load('data_eda.npy')
-    queries = np.load('queries_eda.npy')
+    try:
+        puntos, clusters = leer_puntos_con_clusters('puntos_con_clusters.txt')
+        centroides = leer_centroides('clusters.txt')
+        consulta = leer_consulta('consulta_actual.txt')
+        vecinos = leer_puntos_archivo('vecinos_con_clustering.txt')
+    except FileNotFoundError as e:
+        print(f"Error: Archivo no encontrado - {e}")
+        return
     
-    # Cargar resultados exportados desde C++
-    consulta = cargar_puntos('consulta_actual.txt')
-    vecinos_con = cargar_puntos('vecinos_con_clustering.txt')
-    clusters_info = cargar_clusters('clusters.txt')
+    distancias = np.linalg.norm(centroides - consulta, axis=1)
+    cluster_cercano_idx = np.argmin(distancias)
+    centroide_cercano = centroides[cluster_cercano_idx]
     
-    # Crear visualización
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(10, 8), facecolor='white')
     
-    # Colores para los clusters
-    colores = plt.cm.tab10(np.linspace(0, 1, len(clusters_info)))
+    colores = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', 
+               '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43',
+               '#A3CB38', '#ED4C67', '#B53471', '#EE5A24', '#009432',
+               '#0652DD', '#9980FA', '#833471', '#F79F1F', '#EA2027']
+
+    for cluster_id in np.unique(clusters):
+        mask = clusters == cluster_id
+        color_idx = cluster_id % len(colores)
+        plt.scatter(puntos[mask, 0], puntos[mask, 1], 
+                    c=colores[color_idx], alpha=0.6, s=20)
+
+    plt.scatter(centroides[:, 0], centroides[:, 1], 
+                c='black', marker='X', s=80, label='Centroides', 
+                edgecolors='white', linewidth=1.5)
+
+    plt.scatter(centroide_cercano[0], centroide_cercano[1], 
+                c='yellow', marker='o', s=200, 
+                label='Cluster más cercano', edgecolors='black', linewidth=2, alpha=0.8)
+
+    plt.scatter(vecinos[:, 0], vecinos[:, 1], 
+                c='blue', s=60, label='Vecinos', 
+                edgecolors='white', linewidth=1.2, alpha=0.9)
     
-    # Mostrar todos los puntos del catálogo, coloreados por proximidad a clusters
-    for i, cluster in enumerate(clusters_info):
-        distancias = np.linalg.norm(data - cluster[:2], axis=1)
-        # Puntos más cercanos a este cluster (simulación de pertenencia)
-        mascara = distancias < 0.15  # Umbral de proximidad
-        plt.scatter(data[mascara, 0], data[mascara, 1], 
-                   color=colores[i], alpha=0.4, s=10, 
-                   label=f'Cluster {int(cluster[2])+1}' if i < 5 else "")
+    plt.scatter(consulta[0], consulta[1], 
+                c='red', marker='*', s=250, 
+                label='Consulta', edgecolors='black', linewidth=1.5)
+
+    plt.title(f'Búsqueda CON Clustering (k={k})', fontsize=14, fontweight='bold', pad=20)
+    plt.xlabel('Coordenada X', fontsize=11)
+    plt.ylabel('Coordenada Y', fontsize=11)
+    plt.grid(True, alpha=0.2, linestyle='--')
+    plt.legend(loc='upper right', frameon=True, fancybox=True, shadow=True)
+
+    plt.gca().set_facecolor('white')
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
+    plt.gca().spines['left'].set_alpha(0.3)
+    plt.gca().spines['bottom'].set_alpha(0.3)
     
-    # Mostrar centroides de clusters
-    plt.scatter(clusters_info[:, 0], clusters_info[:, 1], color='black', s=120, 
-                marker='X', label='Centroides', zorder=8)
+    plt.figtext(0.15, 0.02, f"Clusters: {len(np.unique(clusters))} | Vecinos: {len(vecinos)}", 
+                fontsize=10, ha='center', 
+                bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8))
     
-    # Consulta actual
-    plt.scatter(consulta[:, 0], consulta[:, 1], color='darkblue', s=200, marker='*', 
-                edgecolors='white', linewidth=2, label='Consulta actual', zorder=10)
-    
-    # Vecinos encontrados
-    plt.scatter(vecinos_con[:, 0], vecinos_con[:, 1], color='lime', s=100, 
-                edgecolors='black', linewidth=2, label='8 vecinos encontrados', zorder=9)
-    
-    # Resaltar cluster más cercano
-    distancias_consulta = np.linalg.norm(clusters_info[:, :2] - consulta[0], axis=1)
-    cluster_cercano_idx = np.argmin(distancias_consulta)
-    cluster_cercano = clusters_info[cluster_cercano_idx]
-    
-    plt.scatter(cluster_cercano[0], cluster_cercano[1], color='yellow', s=200, 
-                edgecolors='red', linewidth=2, marker='o', 
-                label=f'Cluster más cercano ({int(cluster_cercano[2])+1})', zorder=11)
-    
-    plt.title(f'Búsqueda CON Clustering (k={k_value} clusters)\nBúsqueda eficiente usando clusters', fontsize=14)
-    plt.xlabel('Coordenada X', fontsize=12)
-    plt.ylabel('Coordenada Y', fontsize=12)
-    plt.legend()
-    plt.grid(True, alpha=0.2)
     plt.axis('equal')
+    plt.tight_layout()
     
-    plt.savefig(f'busqueda_con_clustering_k{k_value}.png', dpi=300, bbox_inches='tight')
+    plt.savefig(f'busqueda_con_clustering_k{k}.png', dpi=300, bbox_inches='tight', 
+                facecolor='white', edgecolor='none')
     plt.show()
+    print(f"Gráfico CON clustering guardado como 'busqueda_con_clustering_k{k}.png'")
 
-# Ejecutar visualizaciones
+def main():
+    
+    grafico_sin_clustering()
+    print()
+    grafico_con_clustering(k=32)  # valor de k aqui
+    
+
+
 if __name__ == "__main__":
-    print("="*60)
-    print("VISUALIZACIÓN DE BÚSQUEDA POR VECINOS MÁS CERCANOS")
-    print("="*60)
-    
-    # Visualizar búsqueda sin clustering
-    visualizar_busqueda_sin_clustering()
-    
-    # Visualizar búsqueda con clustering para diferentes valores de k
-    print("\n" + "="*60)
-    visualizar_busqueda_con_clustering(8)   # k=8 clusters
-    
-    print("\n" + "="*60)
-    visualizar_busqueda_con_clustering(32)  # k=32 clusters (óptimo según tus resultados)
-    
-    print("\nVisualizaciones completadas!")
-    print("Archivos generados:")
-    print("- busqueda_sin_clustering.png")
-    print("- busqueda_con_clustering_k8.png") 
-    print("- busqueda_con_clustering_k32.png")
+    main()

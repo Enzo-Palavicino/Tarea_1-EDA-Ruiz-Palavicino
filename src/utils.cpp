@@ -44,9 +44,7 @@ float vec_compute_avg_dif(const float *u, const float* v,  size_t dim){
     float dif = 0;
     for (size_t i = 0;  i < dim; i++){        
         dif = dif + std::abs(u[i] - v[i]);
-        //std::cout << u[i] << " - " << v[i] << "  " << std::abs(u[i] - v[i]) << std::endl;
     }   
-    //std::cout << dif <<std::endl;
     return dif / dim;
 }
 
@@ -58,12 +56,11 @@ void print_array(const float *array, size_t d){
 }
 
 void crear_puntos(const float * mat, std::vector<punto> * puntos, int t){
-    // t es el número de puntos, cada punto tiene 2 coordenadas
     for(size_t i = 0; i < t; i++){
         std::vector<float> coordenadas;
-        coordenadas.push_back(mat[i * 2]);      // ← x
-        coordenadas.push_back(mat[i * 2 + 1]);  // ← y
-        puntos->push_back(punto(coordenadas, 0, i));  // i como ID único
+        coordenadas.push_back(mat[i * 2]);      //  x
+        coordenadas.push_back(mat[i * 2 + 1]);  // y
+        puntos->push_back(punto(coordenadas, 0, i)); 
     }
 }
 

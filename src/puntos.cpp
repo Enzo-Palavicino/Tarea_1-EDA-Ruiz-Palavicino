@@ -17,7 +17,7 @@ int punto::mostrar_nombre(){
     return nombre;
 }
 
-std::vector<float> punto::mostrar_posicion(){
+std::vector<float> punto::mostrar_posicion() const {
     return posicion;
 }
 
@@ -33,14 +33,6 @@ void punto::editar_distancia(float n_dis){
     dis_cent = n_dis;
 }
 
-// void punto::mostrar_datos(){
-//     std::cout << "======================================" << "\n\n";
-//     std::cout <<"          Datos del punto " << nombre << "\n \n";
-//     std::cout <<" x: " << posicion[0] << " y: " << posicion[1] << std::endl;
-//     std::cout <<" pertenece al cluster: " << n_cluster << std::endl;
-//     std::cout <<" distancia a la consulta: " << dis_cent << std::endl;
-//     std::cout << "======================================" << "\n\n";
-// }
 
 void punto::mostrar_datos(){
     std::cout << "Nombre: " << nombre << std::endl;

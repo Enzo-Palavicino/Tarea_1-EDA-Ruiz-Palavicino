@@ -10,7 +10,6 @@ class SimSearch{
         std::vector<Consulta> consultas;
         Cluster* clusters;
         
-        // Variables para almacenar los resultados de la última búsqueda
         mutable size_t comparaciones_count; 
         mutable long long time_without_sort;
         mutable long long time_with_sort;
@@ -29,7 +28,6 @@ class SimSearch{
         std::vector<punto> pasar_puntos();
         Consulta pasar_consulta(int i);
         
-        // Función auxiliar para calcular error
         float calcular_error(const std::vector<size_t>& resultado_sin_cluster, 
                            const std::vector<size_t>& resultado_con_cluster,
                            Consulta con);

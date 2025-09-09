@@ -11,7 +11,7 @@ Consulta::Consulta(int n,std::vector<float> p){
 }
 
 
-std::vector<float> Consulta::dar_posicion(){
+std::vector<float> Consulta::dar_posicion() const {
     return posicion;
 }
 

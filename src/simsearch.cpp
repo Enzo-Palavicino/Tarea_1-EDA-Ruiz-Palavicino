@@ -108,28 +108,12 @@ std::vector<size_t> SimSearch::search_without(Consulta con, int m){
 
 std::vector<size_t> SimSearch::search_with_clusters(Consulta con, int m, float& error){
     reset_comparaciones();
-    
-    // PASO 0: Primero obtener resultado sin clusters para calcular error después
-    std::vector<size_t> resultado_sin_cluster;
-    {
-        std::vector<punto> puntos_copia = puntos;
-        float coor_c[2] = {con.dar_posicion()[0], con.dar_posicion()[1]};
-        for(size_t i = 0; i < puntos_copia.size(); i++){
-            float coor_p[2] = {puntos_copia[i].mostrar_posicion()[0], puntos_copia[i].mostrar_posicion()[1]};
-            float distancia = vec_compute_distance(coor_c, coor_p, 2);
-            puntos_copia[i].editar_distancia(distancia);
-        }
-        std::vector<size_t> indices_ordenados = argsort(puntos_copia);
-        for(int i = 0; i < m && i < indices_ordenados.size(); i++){
-            resultado_sin_cluster.push_back(indices_ordenados[i]);
-        }
-    }
-
+    std::vector<size_t> resultado_sin_cluster = search_without(con, m);
     reset_comparaciones();
-
     auto start_search = std::chrono::high_resolution_clock::now();
 
-    // PASO 1: Encontrar clusters más cercanos
+    std::vector<std::pair<punto, size_t>> puntos_con_indices;
+
     std::vector<float> distancias_a_clusters;
     for (size_t i = 0; i < clusters->getK(); i++) {
         const float* centroide = clusters->getCentroid(i);
@@ -137,52 +121,37 @@ std::vector<size_t> SimSearch::search_with_clusters(Consulta con, int m, float& 
         distancias_a_clusters.push_back(distancia);
         comparaciones_count++;
     }
-
-    // Ordenar clusters por distancia
     std::vector<size_t> clusters_ordenados = argsort(distancias_a_clusters);
-
-    // PASO 2: Buscar solo en los clusters necesarios
-    std::vector<punto> puntos_relevantes;
     size_t cluster_idx = 0;
-    size_t puntos_necesarios = m;
-    
-    while (puntos_relevantes.size() < puntos_necesarios && cluster_idx < clusters_ordenados.size()) {
+    while (puntos_con_indices.size() < m * 2 && cluster_idx < clusters_ordenados.size()) {
         size_t cluster_actual = clusters_ordenados[cluster_idx];
         std::vector<size_t> indices_en_cluster = clusters->getInds(cluster_actual);
-        
         float coor_c[2] = {con.dar_posicion()[0], con.dar_posicion()[1]};
-        for(size_t indice : indices_en_cluster){
-            punto p = puntos[indice];
+        for(size_t indice_original : indices_en_cluster){
+            punto p = puntos[indice_original];
             float coor_p[2] = {p.mostrar_posicion()[0], p.mostrar_posicion()[1]};
             float distancia = vec_compute_distance(coor_c, coor_p, 2);
             p.editar_distancia(distancia);
-            puntos_relevantes.push_back(p);
+            puntos_con_indices.push_back({p, indice_original});
             comparaciones_count++;
         }
         cluster_idx++;
-        
-        if (puntos_relevantes.size() >= puntos_necesarios) {
-            break;
-        }
     }
-
     auto stop_search = std::chrono::high_resolution_clock::now();
     time_without_sort = std::chrono::duration_cast<std::chrono::microseconds>(stop_search - start_search).count();
-    
     auto start_sort = std::chrono::high_resolution_clock::now();
-    std::vector<size_t> indices_ordenados = argsort(puntos_relevantes);
+    std::vector<punto> solo_puntos;
+    for (const auto& pair : puntos_con_indices) {
+        solo_puntos.push_back(pair.first);
+    }
+    std::vector<size_t> indices_ordenados = argsort(solo_puntos);
     auto stop_sort = std::chrono::high_resolution_clock::now();
-
     long long sort_time = std::chrono::duration_cast<std::chrono::microseconds>(stop_sort - start_sort).count();
     time_with_sort = time_without_sort + sort_time;
-
     std::vector<size_t> resultado;
     for(int i = 0; i < m && i < indices_ordenados.size(); i++){
-        resultado.push_back(puntos_relevantes[indices_ordenados[i]].mostrar_nombre());
+        resultado.push_back(puntos_con_indices[indices_ordenados[i]].second);
     }
-    
     error = calcular_error(resultado_sin_cluster, resultado, con);
-    
     return resultado;
 }
-//punto seguro

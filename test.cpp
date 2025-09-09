@@ -9,6 +9,48 @@
 #include <ctime>
 #include <chrono>
 #include <iomanip>
+#include <fstream>
+
+void exportar_resultados(const std::vector<size_t>& indices, 
+                        const std::vector<punto>& puntos, 
+                        const std::string& filename) {
+    std::ofstream file(filename);
+    for (size_t idx : indices) {
+        const auto& pos = puntos[idx].mostrar_posicion();
+        file << pos[0] << " " << pos[1] << "\n";
+    }
+    file.close();
+}
+
+void exportar_puntos_con_clusters(Cluster* clusters, 
+                                 const std::vector<punto>& puntos, 
+                                 const std::string& filename) {
+    std::ofstream file(filename);
+    for (size_t i = 0; i < clusters->getK(); i++) {
+        std::vector<size_t> indices = clusters->getInds(i);
+        for (size_t idx : indices) {
+            const auto& pos = puntos[idx].mostrar_posicion();
+            file << pos[0] << " " << pos[1] << " " << i << "\n";
+        }
+    }
+    file.close();
+}
+
+void exportar_centroides(Cluster* clusters, const std::string& filename) {
+    std::ofstream file(filename);
+    for (size_t i = 0; i < clusters->getK(); i++) {
+        const float* centroide = clusters->getCentroid(i);
+        file << centroide[0] << " " << centroide[1] << "\n";
+    }
+    file.close();
+}
+
+void exportar_consulta(const Consulta& consulta, const std::string& filename) {
+    std::ofstream file(filename);
+    const auto& pos = consulta.dar_posicion();
+    file << pos[0] << " " << pos[1] << "\n";
+    file.close();
+}
 
 void imprimir_tabla_por_m(int m, const std::vector<int>& k_values, 
                          const std::vector<std::vector<int>>& comparaciones_promedio,
@@ -21,19 +63,17 @@ void imprimir_tabla_por_m(int m, const std::vector<int>& k_values,
     std::cout << "================================================================" << std::endl;
     std::cout << std::setw(10) << "k-clusters" 
               << std::setw(20) << "#comparaciones" 
-              << std::setw(25) << "tiempo (μs) sin ordenar"
-              << std::setw(25) << "tiempo (μs) con ordenar"
+              << std::setw(25) << "tiempo sin ordenar"
+              << std::setw(25) << "tiempo con ordenar"
               << std::setw(15) << "error" << std::endl;
     std::cout << "----------------------------------------------------------------" << std::endl;
-    
-    // Fila para sin clustering (k=0)
+
     std::cout << std::setw(10) << "0" 
               << std::setw(20) << comparaciones_promedio[0][0] 
               << std::setw(25) << tiempo_sin_ordenar[0][0] 
               << std::setw(25) << tiempo_con_ordenar[0][0]
               << std::setw(15) << "0.0" << std::endl;
-    
-    // Filas para cada valor de k
+
     for (size_t i = 0; i < k_values.size(); i++) {
         std::cout << std::setw(10) << k_values[i] 
                   << std::setw(20) << comparaciones_promedio[1][i] 
@@ -49,8 +89,9 @@ int main() {
     std::vector<int> m_values = {8, 16, 32, 64, 128};
     std::vector<int> k_values = {8, 16, 32, 64, 128};
     int numero_consultas = 100;
+    
+    int consulta_visualizacion = 0; 
 
-    // Cargar datos
     std::string filename1 = "data_eda.npy";
     Matrix mat_data(filename1);
     
@@ -75,16 +116,15 @@ int main() {
         consultas_totales.push_back(Consulta(i, coordenadas));
     }
 
-    // Para cada valor de m, crear una tabla
     for (int m : m_values) {
-        std::vector<std::vector<int>> comparaciones_por_k(2); // [0]=sin, [1]=con
+        std::vector<std::vector<int>> comparaciones_por_k(2);
         std::vector<std::vector<long long>> tiempo_sin_ordenar_por_k(2);
         std::vector<std::vector<long long>> tiempo_con_ordenar_por_k(2);
         std::vector<std::vector<float>> errores_por_k(2);
         
-        // Primero, resultado sin clustering (k=0)
+
         {
-            Cluster clusters_dummy(mat_data, 8); // k dummy, no se usa
+            Cluster clusters_dummy(mat_data, 8);
             SimSearch simulador(puntos_totales, consultas_totales, &clusters_dummy);
             
             int comparaciones_total = 0;
@@ -96,6 +136,11 @@ int main() {
                 comparaciones_total += simulador.get_comparaciones();
                 tiempo_sin_total += simulador.get_time_without_sort();
                 tiempo_con_total += simulador.get_time_with_sort();
+
+                if (i == consulta_visualizacion) {
+                    exportar_consulta(simulador.pasar_consulta(i), "consulta_actual.txt");
+                    exportar_resultados(resultado, puntos_totales, "vecinos_sin_clustering.txt");
+                }
             }
             
             comparaciones_por_k[0].push_back(comparaciones_total / numero_consultas);
@@ -103,8 +148,7 @@ int main() {
             tiempo_con_ordenar_por_k[0].push_back(tiempo_con_total / numero_consultas);
             errores_por_k[0].push_back(0.0f);
         }
-        
-        // Luego, para cada valor de k con clustering
+
         for (int k : k_values) {
             std::cout << "Procesando m = " << m << ", k = " << k << "..." << std::endl;
             
@@ -116,8 +160,10 @@ int main() {
             long long tiempo_sin_total = 0;
             long long tiempo_con_total = 0;
             float error_total = 0.0f;
-            
-            // Probar método con clustering
+
+            exportar_puntos_con_clusters(&clusters_totales, puntos_totales, "puntos_con_clusters.txt");
+            exportar_centroides(&clusters_totales, "clusters.txt");
+
             for (int i = 0; i < numero_consultas; i++) {
                 float error_consulta = 0.0f;
                 auto resultado = simulador.search_with_clusters(simulador.pasar_consulta(i), m, error_consulta);
@@ -125,6 +171,10 @@ int main() {
                 tiempo_sin_total += simulador.get_time_without_sort();
                 tiempo_con_total += simulador.get_time_with_sort();
                 error_total += error_consulta;
+
+                if (i == consulta_visualizacion) {
+                    exportar_resultados(resultado, puntos_totales, "vecinos_con_clustering.txt");
+                }
             }
             
             comparaciones_por_k[1].push_back(comparaciones_total / numero_consultas);
@@ -132,14 +182,10 @@ int main() {
             tiempo_con_ordenar_por_k[1].push_back(tiempo_con_total / numero_consultas);
             errores_por_k[1].push_back(error_total / numero_consultas);
         }
-        
-        // Imprimir tabla para este valor de m
+
         imprimir_tabla_por_m(m, k_values, comparaciones_por_k, 
                            tiempo_sin_ordenar_por_k, tiempo_con_ordenar_por_k, 
                            errores_por_k);
     }
-
     return 0;
-    
 }
-//punto seguro

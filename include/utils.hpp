@@ -1,5 +1,4 @@
 #pragma once
-
 #include <cmath>
 #include "matrix.hpp"
 #include "puntos.hpp"
@@ -22,19 +21,11 @@ void crear_puntos(const float * datos, std::vector<punto> * puntos, int  t);
 
 void crear_consultas(const float * datos, std::vector<Consulta> * consultas, int  t);
 
-// quick sorts
-// sin clusters
-
-int dividir_punto(std::vector<punto> & puntos, int i, int j); // esta funcion se saco del libro del profe pg. 31
+int dividir_punto(std::vector<punto> & puntos, int i, int j);
 
 void quick_sort(std::vector<punto> & puntos, int i, int j);
 
-// con clusters
-
-// Funcion que ordena los indices de un vector de puntos en base a sus distancias.
 std::vector<size_t> argsort(const std::vector<punto>& puntos);
 
-// Nueva función: argsort para vectores de floats
 std::vector<size_t> argsort(const std::vector<float>& values);
 
-//punto seguro

@@ -16,7 +16,7 @@ class Consulta{
 
     public:
         Consulta(int, std::vector<float>);
-        std::vector<float> dar_posicion();
+        std::vector<float> dar_posicion() const;
         std::vector<punto> dar_puntos();
         void modificar_puntos(std::vector<punto> );
         void mostrar_datos();
